@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Roadmap - IT Roadmap Visualizer</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://unpkg.com/vis-timeline@7.7.3/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/vis-timeline@7.7.3/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <style>
+        .vis-item {
+            border-width: 2px;
+            font-weight: 500;
+        }
+        .vis-item.planned {
+            background-color: #e3f2fd;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+        .vis-item.in-progress {
+            background-color: #fff3e0;
+            border-color: #f57c00;
+            color: #f57c00;
+        }
+        .vis-item.completed {
+            background-color: #e8f5e9;
+            border-color: #388e3c;
+            color: #388e3c;
+        }
+        .vis-item.blocked {
+            background-color: #ffebee;
+            border-color: #d32f2f;
+            color: #d32f2f;
+        }
+        .item-details {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+        .notes-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .notes-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .markdown-content {
+            line-height: 1.8;
+            color: #333;
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .markdown-content code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .markdown-content pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .markdown-content blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #7f8c8d;
+        }
+        .timeline-controls {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .timeline-controls button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .timeline-controls button:hover {
+            background-color: #2980b9;
+        }
+        .timeline-controls button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .timeline-controls .divider {
+            width: 1px;
+            height: 30px;
+            background-color: #ddd;
+            margin: 0 5px;
+        }
+        .timeline-controls label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .timeline-controls input[type="checkbox"] {
+            cursor: pointer;
+        }
+        .fullscreen-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background: #f5f5f5;
+            padding: 20px;
+            overflow: auto;
+            display: none;
+        }
+        .fullscreen-wrapper.active {
+            display: block;
+        }
+        .fullscreen-wrapper #timeline {
+            height: calc(100vh - 200px) !important;
+        }
+        .fullscreen-wrapper .timeline-controls {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>IT Roadmap Visualizer</h1>
+            <nav>
+                <a href="/">Upload</a>
+<a href="/list">View Roadmaps</a>
+                <a href="/compare">Compare Roadmaps</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="message"></div>
+
+        <div class="roadmap-header" id="roadmapHeader">
+            <h2 id="roadmapName">Loading...</h2>
+            <div class="info" id="roadmapInfo"></div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #e3f2fd; border-color: #1976d2;"></div>
+                    <span>Planned</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #fff3e0; border-color: #f57c00;"></div>
+                    <span>In Progress</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #e8f5e9; border-color: #388e3c;"></div>
+                    <span>Completed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #ffebee; border-color: #d32f2f;"></div>
+                    <span>Blocked</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="notes-section" id="roadmapNotes" style="display: none;">
+            <h3>Roadmap Notes</h3>
+            <div class="markdown-content" id="roadmapNotesContent"></div>
+        </div>
+
+        <div class="timeline-controls" id="timelineControls" style="display: none;">
+            <button onclick="zoomIn()" title="Zoom In">🔍+ Zoom In</button>
+            <button onclick="zoomOut()" title="Zoom Out">🔍- Zoom Out</button>
+            <button onclick="fitTimeline()" title="Fit All">📏 Fit All</button>
+            <div class="divider"></div>
+            <button onclick="panLeft()" title="Pan Left">← Left</button>
+            <button onclick="panRight()" title="Pan Right">Right →</button>
+            <div class="divider"></div>
+            <button onclick="toggleFullscreen()" id="fullscreenBtn" title="Toggle Fullscreen">⛶ Fullscreen</button>
+            <div class="divider"></div>
+            <label title="Enable/disable mouse gestures">
+                <input type="checkbox" id="gesturesToggle" checked onchange="toggleGestures()">
+                <span>Enable Gestures</span>
+            </label>
+        </div>
+
+        <div id="timeline"></div>
+
+        <div class="item-details" id="itemDetails" style="display: none;">
+            <h3 id="itemName"></h3>
+            <div id="itemInfo"></div>
+        </div>
+    </div>
+
+    <div class="fullscreen-wrapper" id="fullscreenWrapper">
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 id="fullscreenTitle" style="color: #2c3e50; margin: 0;"></h2>
+            <button onclick="toggleFullscreen()" style="background-color: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">✕ Exit Fullscreen</button>
+        </div>
+        <div id="fullscreenControlsContainer"></div>
+        <div id="fullscreenTimelineContainer"></div>
+    </div>
+
+    <script>
+        const messageDiv = document.getElementById('message');
+        const roadmapName = document.getElementById('roadmapName');
+        const roadmapInfo = document.getElementById('roadmapInfo');
+        const itemDetails = document.getElementById('itemDetails');
+        const itemName = document.getElementById('itemName');
+        const itemInfo = document.getElementById('itemInfo');
+
+        let timeline = null;
+
+        function showMessage(text, type) {
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+        }
+
+        function hideMessage() {
+            messageDiv.style.display = 'none';
+        }
+
+        function parseDate(dateStr) {
+            // Handle fiscal year quarter format (FY2026-Q1)
+            // Fiscal year starts July 1st
+            // Q1 = July-Sept, Q2 = Oct-Dec, Q3 = Jan-Mar, Q4 = Apr-Jun
+            if (dateStr.match(/^\d{4}-Q[1-4]$/)) {
+                const [fyYear, quarter] = dateStr.split('-Q');
+                const fy = parseInt(fyYear);
+                const q = parseInt(quarter);
+
+                // Q1 and Q2 are in the previous calendar year
+                // Q3 and Q4 are in the fiscal year
+                if (q === 1) {
+                    return new Date(fy - 1, 6, 1);  // July 1 of previous year
+                } else if (q === 2) {
+                    return new Date(fy - 1, 9, 1);  // October 1 of previous year
+                } else if (q === 3) {
+                    return new Date(fy, 0, 1);      // January 1 of fiscal year
+                } else if (q === 4) {
+                    return new Date(fy, 3, 1);      // April 1 of fiscal year
+                }
+            }
+            // Handle standard date format
+            return new Date(dateStr);
+        }
+
+        function getEndDate(dateStr) {
+            // For fiscal year quarter format, return end of quarter
+            // Q1 = July-Sept, Q2 = Oct-Dec, Q3 = Jan-Mar, Q4 = Apr-Jun
+            if (dateStr.match(/^\d{4}-Q[1-4]$/)) {
+                const [fyYear, quarter] = dateStr.split('-Q');
+                const fy = parseInt(fyYear);
+                const q = parseInt(quarter);
+
+                if (q === 1) {
+                    // September 30 of previous year
+                    return new Date(fy - 1, 8, 30);
+                } else if (q === 2) {
+                    // December 31 of previous year
+                    return new Date(fy - 1, 11, 31);
+                } else if (q === 3) {
+                    // March 31 of fiscal year
+                    return new Date(fy, 2, 31);
+                } else if (q === 4) {
+                    // June 30 of fiscal year
+                    return new Date(fy, 5, 30);
+                }
+            }
+            return new Date(dateStr);
+        }
+
+        function createTimeline(roadmapData) {
+            const container = document.getElementById('timeline');
+            const items = [];
+
+            console.log('Roadmap data:', roadmapData);
+            console.log('Number of items:', roadmapData.roadmap.items.length);
+
+            roadmapData.roadmap.items.forEach(item => {
+                const startDate = parseDate(item.start);
+                const endDate = getEndDate(item.end);
+                console.log(`Item: ${item.name}, Start: ${item.start} -> ${startDate}, End: ${item.end} -> ${endDate}`);
+
+                items.push({
+                    id: item.id,
+                    content: item.name,
+                    start: startDate,
+                    end: endDate,
+                    className: item.status,
+                    title: item.description || item.name,
+                    data: item
+                });
+            });
+
+            console.log('Timeline items:', items);
+
+            const options = {
+                width: '100%',
+                height: '600px',
+                margin: {
+                    item: 20
+                },
+                orientation: 'top',
+                stack: true,
+                showCurrentTime: true,
+                zoomMin: 1000 * 60 * 60 * 24 * 30, // 1 month
+                zoomMax: 1000 * 60 * 60 * 24 * 365 * 5, // 5 years
+                editable: false
+            };
+
+            timeline = new vis.Timeline(container, items, options);
+            console.log('Timeline created successfully');
+
+            // Show timeline controls
+            document.getElementById('timelineControls').style.display = 'flex';
+
+            // Handle item selection
+            timeline.on('select', function (properties) {
+                if (properties.items.length > 0) {
+                    const itemId = properties.items[0];
+                    const item = roadmapData.roadmap.items.find(i => i.id === itemId);
+                    if (item) {
+                        showItemDetails(item);
+                    }
+                }
+            });
+        }
+
+        function showItemDetails(item) {
+            itemName.textContent = item.name;
+
+            let html = `
+                <p style="margin: 10px 0;"><strong>Status:</strong> <span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></p>
+                <p style="margin: 10px 0;"><strong>Timeline:</strong> ${item.start} to ${item.end}</p>
+            `;
+
+            if (item.description) {
+                html += `<p style="margin: 10px 0;"><strong>Description:</strong> ${item.description}</p>`;
+            }
+
+            if (item.notes) {
+                html += `<div style="margin: 20px 0;">
+                    <strong>Notes:</strong>
+                    <div class="markdown-content" style="margin-top: 10px; padding: 15px; background: #f8f9fa; border-radius: 4px;">
+                        ${marked.parse(item.notes)}
+                    </div>
+                </div>`;
+            }
+
+            if (item.dependencies && item.dependencies.length > 0) {
+                html += `<p style="margin: 10px 0;"><strong>Dependencies:</strong> ${item.dependencies.join(', ')}</p>`;
+            }
+
+            itemInfo.innerHTML = html;
+            itemDetails.style.display = 'block';
+        }
+
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+
+        // Timeline control functions
+        function zoomIn() {
+            if (timeline) {
+                timeline.zoomIn(0.5);
+            }
+        }
+
+        function zoomOut() {
+            if (timeline) {
+                timeline.zoomOut(0.5);
+            }
+        }
+
+        function fitTimeline() {
+            if (timeline) {
+                timeline.fit();
+            }
+        }
+
+        function panLeft() {
+            if (timeline) {
+                const range = timeline.getWindow();
+                const interval = range.end - range.start;
+                timeline.setWindow(
+                    new Date(range.start.getTime() - interval * 0.2),
+                    new Date(range.end.getTime() - interval * 0.2)
+                );
+            }
+        }
+
+        function panRight() {
+            if (timeline) {
+                const range = timeline.getWindow();
+                const interval = range.end - range.start;
+                timeline.setWindow(
+                    new Date(range.start.getTime() + interval * 0.2),
+                    new Date(range.end.getTime() + interval * 0.2)
+                );
+            }
+        }
+
+        function toggleFullscreen() {
+            const wrapper = document.getElementById('fullscreenWrapper');
+            const btn = document.getElementById('fullscreenBtn');
+            const controls = document.getElementById('timelineControls');
+            const timelineContainer = document.getElementById('timeline');
+            const normalContainer = timelineContainer.parentElement;
+
+            if (wrapper.classList.contains('active')) {
+                // Exit fullscreen - move back to normal container
+                wrapper.classList.remove('active');
+                normalContainer.insertBefore(controls, timelineContainer);
+                normalContainer.insertBefore(timelineContainer, document.getElementById('itemDetails'));
+                btn.textContent = '⛶ Fullscreen';
+
+                // Restore normal height
+                if (timeline) {
+                    timeline.setOptions({ height: '600px' });
+                    setTimeout(() => timeline.redraw(), 100);
+                }
+            } else {
+                // Enter fullscreen - move to fullscreen wrapper
+                wrapper.classList.add('active');
+                document.getElementById('fullscreenControlsContainer').appendChild(controls);
+                document.getElementById('fullscreenTimelineContainer').appendChild(timelineContainer);
+                document.getElementById('fullscreenTitle').textContent = document.getElementById('roadmapName').textContent;
+                btn.textContent = '⛶ Fullscreen';
+
+                // Set fullscreen height - calculate based on viewport
+                if (timeline) {
+                    const fullscreenHeight = window.innerHeight - 180; // Account for header and controls
+                    timeline.setOptions({ height: `${fullscreenHeight}px` });
+                    setTimeout(() => timeline.redraw(), 100);
+                }
+            }
+        }
+
+        function toggleGestures() {
+            const enabled = document.getElementById('gesturesToggle').checked;
+            if (timeline) {
+                timeline.setOptions({
+                    zoomable: enabled,
+                    moveable: enabled
+                });
+            }
+        }
+
+        async function loadRoadmap() {
+            hideMessage();
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                showMessage('No roadmap ID provided', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/roadmaps/${id}`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    roadmapName.textContent = data.roadmap.name;
+
+                    let infoHTML = `<span><strong>Service Line:</strong> ${data.roadmap.service_line}</span>`;
+                    if (data.roadmap.owner) {
+                        infoHTML += `<span><strong>Owner:</strong> ${data.roadmap.owner}</span>`;
+                    }
+                    infoHTML += `<span><strong>Items:</strong> ${data.roadmap.items.length}</span>`;
+
+                    roadmapInfo.innerHTML = infoHTML;
+
+                    // Display roadmap notes if present
+                    if (data.roadmap.notes) {
+                        const roadmapNotesSection = document.getElementById('roadmapNotes');
+                        const roadmapNotesContent = document.getElementById('roadmapNotesContent');
+                        roadmapNotesContent.innerHTML = marked.parse(data.roadmap.notes);
+                        roadmapNotesSection.style.display = 'block';
+                    }
+
+                    createTimeline(data);
+                } else {
+                    showMessage('Failed to load roadmap', 'error');
+                }
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        loadRoadmap();
+    </script>
+</body>
+</html>

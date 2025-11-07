@@ -1,0 +1,52 @@
+roadmap:
+  name: "Data Platform"
+  service_line: "Data Engineering"
+  owner: "Data Platform Team"
+  items:
+    - id: "data-lake-setup"
+      name: "Data Lake Infrastructure"
+      start: "2025-Q1"
+      end: "2025-Q2"
+      status: "completed"
+      description: "Set up S3-based data lake with proper partitioning and governance"
+      dependencies: []
+
+    - id: "etl-pipeline"
+      name: "ETL Pipeline Framework"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "in-progress"
+      description: "Build scalable ETL pipeline using Apache Airflow"
+      dependencies: ["data-lake-setup"]
+
+    - id: "real-time-streaming"
+      name: "Real-time Streaming Platform"
+      start: "2025-Q3"
+      end: "2025-Q4"
+      status: "planned"
+      description: "Implement Kafka-based streaming for real-time analytics"
+      dependencies: ["data-lake-setup"]
+
+    - id: "data-catalog"
+      name: "Data Catalog & Discovery"
+      start: "2025-Q3"
+      end: "2025-Q4"
+      status: "blocked"
+      description: "Implement data catalog for metadata management (blocked on vendor selection)"
+      dependencies: ["etl-pipeline"]
+
+    - id: "ml-platform"
+      name: "ML Platform Integration"
+      start: "2025-Q4"
+      end: "2026-Q2"
+      status: "planned"
+      description: "Integrate ML platform for model training and deployment"
+      dependencies: ["etl-pipeline", "real-time-streaming"]
+
+    - id: "data-quality"
+      name: "Data Quality Framework"
+      start: "2026-Q1"
+      end: "2026-Q2"
+      status: "planned"
+      description: "Automated data quality checks and monitoring"
+      dependencies: ["etl-pipeline", "data-catalog"]

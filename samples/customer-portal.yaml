@@ -1,0 +1,75 @@
+roadmap:
+  name: "Customer Portal"
+  service_line: "Customer Experience"
+  owner: "Frontend Team"
+  notes: |
+    ## Overview
+    This roadmap outlines the development of our new **Customer Portal**, a comprehensive self-service platform for our customers.
+
+    ### Key Goals
+    - Improve customer satisfaction through self-service capabilities
+    - Reduce support ticket volume by 40%
+    - Increase customer engagement and retention
+
+    ### Technical Stack
+    - Frontend: React 18 with TypeScript
+    - Backend: Node.js with Express
+    - Database: PostgreSQL
+    - Payments: Stripe API
+
+    > **Note:** All items are subject to change based on customer feedback and business priorities.
+  items:
+    - id: "portal-redesign"
+      name: "Portal UI Redesign"
+      start: "2025-Q1"
+      end: "2025-Q2"
+      status: "completed"
+      description: "Modern React-based UI with improved UX"
+      dependencies: []
+
+    - id: "self-service-dashboard"
+      name: "Self-Service Dashboard"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "in-progress"
+      description: "Customer dashboard for account management and analytics"
+      notes: |
+        ### Implementation Details
+        - **Phase 1:** Basic account information and settings
+        - **Phase 2:** Usage analytics and reporting
+        - **Phase 3:** Advanced customization options
+
+        #### Technical Considerations
+        - Must support real-time data updates
+        - Responsive design for mobile devices
+        - Integration with existing auth system
+
+        ```javascript
+        // Example API endpoint
+        GET /api/v1/dashboard/analytics
+        ```
+      dependencies: ["portal-redesign"]
+
+    - id: "payment-integration"
+      name: "Payment Gateway Integration"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "in-progress"
+      description: "Integrate Stripe for payment processing"
+      dependencies: ["portal-redesign"]
+
+    - id: "support-chat"
+      name: "Live Chat Support"
+      start: "2025-Q3"
+      end: "2025-Q4"
+      status: "planned"
+      description: "Real-time chat support with AI-assisted responses"
+      dependencies: ["self-service-dashboard"]
+
+    - id: "mobile-app"
+      name: "Mobile Application"
+      start: "2025-Q4"
+      end: "2026-Q2"
+      status: "planned"
+      description: "Native mobile apps for iOS and Android"
+      dependencies: ["self-service-dashboard", "payment-integration"]

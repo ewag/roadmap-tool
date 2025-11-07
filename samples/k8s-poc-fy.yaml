@@ -1,0 +1,100 @@
+roadmap:
+  name: "Kubernetes Proof of Concept"
+  service_line: "Infrastructure"
+  owner: "Infrastructure Team"
+  notes: |
+    ## Fiscal Year 2026 Infrastructure Initiative
+
+    This roadmap uses **fiscal year quarters** starting July 1st.
+    - FY2026-Q1 = July 1, 2025 - Sept 30, 2025
+    - FY2026-Q2 = Oct 1, 2025 - Dec 31, 2025
+    - FY2026-Q3 = Jan 1, 2026 - Mar 31, 2026
+    - FY2026-Q4 = Apr 1, 2026 - Jun 30, 2026
+
+    ### Objectives
+    - Establish production-ready Kubernetes platform
+    - Enable developer self-service
+    - Implement GitOps workflows
+  items:
+    - id: "sdps-completed"
+      name: "Complete 4-5 SDPs for k8s platform design"
+      start: "2026-Q2"
+      end: "2026-Q3"
+      status: "planned"
+      description: "Complete 4-5 Software Design Packages (SDPs) for the architecture and design of the Kubernetes platform"
+      dependencies: []
+
+    - id: "hardware-provisioning"
+      name: "Configure 10 blades for k8s cluster"
+      start: "2026-Q3"
+      end: "2026-Q4"
+      status: "planned"
+      description: "Building and configuring 10 blades to host the Kubernetes cluster for the PoC"
+      dependencies: ["sdps-completed"]
+
+    - id: "k8s-installation"
+      name: "Install openSUSE k8s on the blades"
+      start: "2026-Q3"
+      end: "2026-Q4"
+      status: "planned"
+      description: "Install and configure Kubernetes (openSUSE Tumbleweed) on the provisioned blades"
+      dependencies: ["hardware-provisioning"]
+
+    - id: "gitops-setup"
+      name: "Setup ArgoCD for GitOps"
+      start: "2026-Q4"
+      end: "2027-Q1"
+      status: "planned"
+      description: "Setup ArgoCD for GitOps-based deployment and management of k8s resources"
+      notes: |
+        ### ArgoCD Configuration
+        - Application sync policies
+        - Multi-cluster support
+        - RBAC integration
+
+        ```yaml
+        # Example ArgoCD Application
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: example-app
+        spec:
+          project: default
+          source:
+            repoURL: https://github.com/example/repo
+            targetRevision: main
+        ```
+      dependencies: ["k8s-installation"]
+
+    - id: "k8s-buildout"
+      name: "Build out k8s PoC environment with developer portal"
+      start: "2026-Q4"
+      end: "2027-Q1"
+      status: "planned"
+      description: "Build out the Kubernetes PoC environment with internal developer portal (Backstage), monitoring, and logging services"
+      dependencies: ["gitops-setup", "k8s-installation"]
+
+    - id: "template-creation"
+      name: "Create deployment templates for common services"
+      start: "2027-Q1"
+      end: "2027-Q3"
+      status: "planned"
+      description: "Create deployment templates and Helm charts for common services like REDCap, JupyterHub, MLflow, and others to streamline deployments"
+      dependencies: ["gitops-setup", "k8s-buildout"]
+
+    - id: "prod-handoff"
+      name: "Handoff to production team"
+      start: "2027-Q2"
+      end: "2027-Q4"
+      status: "planned"
+      description: "Handoff the completed Kubernetes PoC environment to the production operations team for further testing and eventual production deployment"
+      notes: |
+        ## Production Readiness Checklist
+        - [ ] Security audit completed
+        - [ ] Disaster recovery plan documented
+        - [ ] Team training completed
+        - [ ] Production monitoring configured
+        - [ ] SLA/SLO defined
+
+        > **Note**: Production team should complete a 30-day shadow period before full handoff.
+      dependencies: ["template-creation", "k8s-buildout"]

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Roadmaps - IT Roadmap Visualizer</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://unpkg.com/vis-timeline@7.7.3/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/vis-timeline@7.7.3/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <style>
+        .vis-item {
+            border-width: 2px;
+            font-weight: 500;
+        }
+        .vis-item.planned {
+            background-color: #e3f2fd;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+        .vis-item.in-progress {
+            background-color: #fff3e0;
+            border-color: #f57c00;
+            color: #f57c00;
+        }
+        .vis-item.completed {
+            background-color: #e8f5e9;
+            border-color: #388e3c;
+            color: #388e3c;
+        }
+        .vis-item.blocked {
+            background-color: #ffebee;
+            border-color: #d32f2f;
+            color: #d32f2f;
+        }
+        .controls {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+        }
+        .checkbox-item label {
+            cursor: pointer;
+            user-select: none;
+        }
+        .filter-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+        .timeline-controls {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .timeline-controls button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .timeline-controls button:hover {
+            background-color: #2980b9;
+        }
+        .timeline-controls button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .timeline-controls .divider {
+            width: 1px;
+            height: 30px;
+            background-color: #ddd;
+            margin: 0 5px;
+        }
+        .timeline-controls label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .timeline-controls input[type="checkbox"] {
+            cursor: pointer;
+        }
+        .fullscreen-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background: #f5f5f5;
+            padding: 20px;
+            overflow: auto;
+            display: none;
+        }
+        .fullscreen-wrapper.active {
+            display: block;
+        }
+        .fullscreen-wrapper #timeline {
+            height: calc(100vh - 200px) !important;
+        }
+        .fullscreen-wrapper .timeline-controls {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>IT Roadmap Visualizer</h1>
+            <nav>
+                <a href="/">Upload</a>
+                <a href="/list">View Roadmaps</a>
+                <a href="/compare">Compare Roadmaps</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="message"></div>
+
+        <div class="controls">
+            <h3>Select Roadmaps to Compare</h3>
+            <div class="checkbox-group" id="roadmapCheckboxes">
+                <p style="color: #7f8c8d;">Loading roadmaps...</p>
+            </div>
+
+            <div class="filter-group">
+                <div>
+                    <label for="statusFilter"><strong>Filter by Status:</strong></label>
+                    <select id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="planned">Planned</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="blocked">Blocked</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="serviceLineFilter"><strong>Filter by Service Line:</strong></label>
+                    <select id="serviceLineFilter">
+                        <option value="">All Service Lines</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="updateTimeline()">Update View</button>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #e3f2fd; border-color: #1976d2;"></div>
+                    <span>Planned</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #fff3e0; border-color: #f57c00;"></div>
+                    <span>In Progress</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #e8f5e9; border-color: #388e3c;"></div>
+                    <span>Completed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background-color: #ffebee; border-color: #d32f2f;"></div>
+                    <span>Blocked</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-controls" id="timelineControls" style="display: none;">
+            <button onclick="zoomIn()" title="Zoom In">🔍+ Zoom In</button>
+            <button onclick="zoomOut()" title="Zoom Out">🔍- Zoom Out</button>
+            <button onclick="fitTimeline()" title="Fit All">📏 Fit All</button>
+            <div class="divider"></div>
+            <button onclick="panLeft()" title="Pan Left">← Left</button>
+            <button onclick="panRight()" title="Pan Right">Right →</button>
+            <div class="divider"></div>
+            <button onclick="toggleFullscreen()" id="fullscreenBtn" title="Toggle Fullscreen">⛶ Fullscreen</button>
+            <div class="divider"></div>
+            <label title="Enable/disable mouse gestures">
+                <input type="checkbox" id="gesturesToggle" checked onchange="toggleGestures()">
+                <span>Enable Gestures</span>
+            </label>
+        </div>
+
+        <div id="timeline" style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-height: 500px;"></div>
+    </div>
+
+    <div class="fullscreen-wrapper" id="fullscreenWrapper">
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="color: #2c3e50; margin: 0;">Compare Roadmaps</h2>
+            <button onclick="toggleFullscreen()" style="background-color: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">✕ Exit Fullscreen</button>
+        </div>
+        <div id="fullscreenControlsContainer"></div>
+        <div id="fullscreenTimelineContainer"></div>
+    </div>
+
+    <script>
+        const messageDiv = document.getElementById('message');
+        let allRoadmaps = [];
+        let timeline = null;
+
+        function showMessage(text, type) {
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+        }
+
+        function hideMessage() {
+            messageDiv.style.display = 'none';
+        }
+
+        function parseDate(dateStr) {
+            // Handle fiscal year quarter format (FY2026-Q1)
+            // Fiscal year starts July 1st
+            // Q1 = July-Sept, Q2 = Oct-Dec, Q3 = Jan-Mar, Q4 = Apr-Jun
+            if (dateStr.match(/^\d{4}-Q[1-4]$/)) {
+                const [fyYear, quarter] = dateStr.split('-Q');
+                const fy = parseInt(fyYear);
+                const q = parseInt(quarter);
+
+                // Q1 and Q2 are in the previous calendar year
+                // Q3 and Q4 are in the fiscal year
+                if (q === 1) {
+                    return new Date(fy - 1, 6, 1);  // July 1 of previous year
+                } else if (q === 2) {
+                    return new Date(fy - 1, 9, 1);  // October 1 of previous year
+                } else if (q === 3) {
+                    return new Date(fy, 0, 1);      // January 1 of fiscal year
+                } else if (q === 4) {
+                    return new Date(fy, 3, 1);      // April 1 of fiscal year
+                }
+            }
+            return new Date(dateStr);
+        }
+
+        function getEndDate(dateStr) {
+            // For fiscal year quarter format, return end of quarter
+            // Q1 = July-Sept, Q2 = Oct-Dec, Q3 = Jan-Mar, Q4 = Apr-Jun
+            if (dateStr.match(/^\d{4}-Q[1-4]$/)) {
+                const [fyYear, quarter] = dateStr.split('-Q');
+                const fy = parseInt(fyYear);
+                const q = parseInt(quarter);
+
+                if (q === 1) {
+                    // September 30 of previous year
+                    return new Date(fy - 1, 8, 30);
+                } else if (q === 2) {
+                    // December 31 of previous year
+                    return new Date(fy - 1, 11, 31);
+                } else if (q === 3) {
+                    // March 31 of fiscal year
+                    return new Date(fy, 2, 31);
+                } else if (q === 4) {
+                    // June 30 of fiscal year
+                    return new Date(fy, 5, 30);
+                }
+            }
+            return new Date(dateStr);
+        }
+
+        async function loadRoadmaps() {
+            try {
+                const response = await fetch('/api/roadmaps');
+                if (response.ok) {
+                    allRoadmaps = await response.json();
+                    displayRoadmapCheckboxes();
+                    populateServiceLineFilter();
+                    updateTimeline();
+                } else {
+                    showMessage('Failed to load roadmaps', 'error');
+                }
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayRoadmapCheckboxes() {
+            const container = document.getElementById('roadmapCheckboxes');
+            container.innerHTML = '';
+
+            allRoadmaps.forEach(roadmap => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `roadmap-${roadmap.id}`;
+                checkbox.value = roadmap.id;
+                checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = `roadmap-${roadmap.id}`;
+                label.textContent = `${roadmap.roadmap.name} (${roadmap.roadmap.service_line})`;
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        function populateServiceLineFilter() {
+            const select = document.getElementById('serviceLineFilter');
+            const serviceLines = new Set(allRoadmaps.map(r => r.roadmap.service_line));
+
+            serviceLines.forEach(sl => {
+                const option = document.createElement('option');
+                option.value = sl;
+                option.textContent = sl;
+                select.appendChild(option);
+            });
+        }
+
+        function getSelectedRoadmaps() {
+            const checkboxes = document.querySelectorAll('#roadmapCheckboxes input[type="checkbox"]:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+            return allRoadmaps.filter(r => selectedIds.includes(r.id));
+        }
+
+        function updateTimeline() {
+            hideMessage();
+            const container = document.getElementById('timeline');
+            const selectedRoadmaps = getSelectedRoadmaps();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const serviceLineFilter = document.getElementById('serviceLineFilter').value;
+
+            if (selectedRoadmaps.length === 0) {
+                if (timeline) {
+                    timeline.destroy();
+                    timeline = null;
+                }
+                document.getElementById('timelineControls').style.display = 'none';
+                container.innerHTML = '<p style="text-align: center; padding: 60px; color: #7f8c8d;">Please select at least one roadmap to display.</p>';
+                return;
+            }
+
+            // Clear any existing message content
+            container.innerHTML = '';
+
+            const groups = [];
+            const items = [];
+
+            selectedRoadmaps.forEach((roadmap, index) => {
+                // Apply service line filter
+                if (serviceLineFilter && roadmap.roadmap.service_line !== serviceLineFilter) {
+                    return;
+                }
+
+                // Add group for this roadmap
+                groups.push({
+                    id: roadmap.id,
+                    content: `${roadmap.roadmap.name}<br/><small style="color: #7f8c8d;">${roadmap.roadmap.service_line}</small>`
+                });
+
+                // Add items
+                roadmap.roadmap.items.forEach(item => {
+                    // Apply status filter
+                    if (statusFilter && item.status !== statusFilter) {
+                        return;
+                    }
+
+                    items.push({
+                        id: `${roadmap.id}-${item.id}`,
+                        content: item.name,
+                        start: parseDate(item.start),
+                        end: getEndDate(item.end),
+                        group: roadmap.id,
+                        className: item.status,
+                        title: `${roadmap.roadmap.name}: ${item.name}\n${item.description || ''}`
+                    });
+                });
+            });
+
+            if (groups.length === 0) {
+                if (timeline) {
+                    timeline.destroy();
+                    timeline = null;
+                }
+                document.getElementById('timelineControls').style.display = 'none';
+                container.innerHTML = '<p style="text-align: center; padding: 60px; color: #7f8c8d;">No roadmaps match the selected filters.</p>';
+                return;
+            }
+
+            // Destroy existing timeline before creating a new one
+            if (timeline) {
+                timeline.destroy();
+                timeline = null;
+            }
+
+            // Calculate appropriate height
+            const normalHeight = Math.max(400, groups.length * 100);
+
+            const options = {
+                width: '100%',
+                height: `${normalHeight}px`,
+                margin: {
+                    item: 20
+                },
+                orientation: 'top',
+                stack: true,
+                showCurrentTime: true,
+                zoomMin: 1000 * 60 * 60 * 24 * 30,
+                zoomMax: 1000 * 60 * 60 * 24 * 365 * 5,
+                editable: false
+            };
+
+            timeline = new vis.Timeline(container, items, groups, options);
+
+            // Store the normal height for later use
+            timeline._normalHeight = normalHeight;
+
+            // Show timeline controls
+            document.getElementById('timelineControls').style.display = 'flex';
+
+            console.log(`Displaying ${items.length} items across ${groups.length} roadmaps`);
+        }
+
+        // Timeline control functions
+        function zoomIn() {
+            if (timeline) {
+                timeline.zoomIn(0.5);
+            }
+        }
+
+        function zoomOut() {
+            if (timeline) {
+                timeline.zoomOut(0.5);
+            }
+        }
+
+        function fitTimeline() {
+            if (timeline) {
+                timeline.fit();
+            }
+        }
+
+        function panLeft() {
+            if (timeline) {
+                const range = timeline.getWindow();
+                const interval = range.end - range.start;
+                timeline.setWindow(
+                    new Date(range.start.getTime() - interval * 0.2),
+                    new Date(range.end.getTime() - interval * 0.2)
+                );
+            }
+        }
+
+        function panRight() {
+            if (timeline) {
+                const range = timeline.getWindow();
+                const interval = range.end - range.start;
+                timeline.setWindow(
+                    new Date(range.start.getTime() + interval * 0.2),
+                    new Date(range.end.getTime() + interval * 0.2)
+                );
+            }
+        }
+
+        function toggleFullscreen() {
+            const wrapper = document.getElementById('fullscreenWrapper');
+            const btn = document.getElementById('fullscreenBtn');
+            const controls = document.getElementById('timelineControls');
+            const timelineContainer = document.getElementById('timeline');
+            const normalContainer = timelineContainer.parentElement;
+
+            if (wrapper.classList.contains('active')) {
+                // Exit fullscreen - move back to normal container
+                wrapper.classList.remove('active');
+                normalContainer.appendChild(controls);
+                normalContainer.appendChild(timelineContainer);
+                btn.textContent = '⛶ Fullscreen';
+
+                // Restore normal height
+                if (timeline) {
+                    const normalHeight = timeline._normalHeight || 500;
+                    timeline.setOptions({ height: `${normalHeight}px` });
+                    setTimeout(() => timeline.redraw(), 100);
+                }
+            } else {
+                // Enter fullscreen - move to fullscreen wrapper
+                wrapper.classList.add('active');
+                document.getElementById('fullscreenControlsContainer').appendChild(controls);
+                document.getElementById('fullscreenTimelineContainer').appendChild(timelineContainer);
+                btn.textContent = '⛶ Fullscreen';
+
+                // Set fullscreen height - calculate based on viewport
+                if (timeline) {
+                    const fullscreenHeight = window.innerHeight - 180; // Account for header and controls
+                    timeline.setOptions({ height: `${fullscreenHeight}px` });
+                    setTimeout(() => timeline.redraw(), 100);
+                }
+            }
+        }
+
+        function toggleGestures() {
+            const enabled = document.getElementById('gesturesToggle').checked;
+            if (timeline) {
+                timeline.setOptions({
+                    zoomable: enabled,
+                    moveable: enabled
+                });
+            }
+        }
+
+        // Load roadmaps on page load
+        loadRoadmaps();
+    </script>
+</body>
+</html>

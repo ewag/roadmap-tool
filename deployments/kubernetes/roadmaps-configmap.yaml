@@ -1,0 +1,181 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: roadmap-samples
+  labels:
+    app: roadmap-visualizer
+data:
+  customer-portal.yaml: |
+    roadmap:
+      name: "Customer Portal"
+      service_line: "Customer Experience"
+      owner: "Frontend Team"
+      notes: |
+        ## Overview
+        This roadmap outlines the development of our new **Customer Portal**, a comprehensive self-service platform for our customers.
+
+        ### Key Goals
+        - Improve customer satisfaction through self-service capabilities
+        - Reduce support ticket volume by 40%
+        - Increase customer engagement and retention
+
+        ### Technical Stack
+        - Frontend: React 18 with TypeScript
+        - Backend: Node.js with Express
+        - Database: PostgreSQL
+        - Payments: Stripe API
+
+        > **Note:** All items are subject to change based on customer feedback and business priorities.
+      items:
+        - id: "portal-redesign"
+          name: "Portal UI Redesign"
+          start: "2025-Q1"
+          end: "2025-Q2"
+          status: "completed"
+          description: "Modern React-based UI with improved UX"
+          dependencies: []
+
+        - id: "self-service-dashboard"
+          name: "Self-Service Dashboard"
+          start: "2025-Q2"
+          end: "2025-Q3"
+          status: "in-progress"
+          description: "Customer dashboard for account management and analytics"
+          notes: |
+            ### Implementation Details
+            - **Phase 1:** Basic account information and settings
+            - **Phase 2:** Usage analytics and reporting
+            - **Phase 3:** Advanced customization options
+
+            #### Technical Considerations
+            - Must support real-time data updates
+            - Responsive design for mobile devices
+            - Integration with existing auth system
+
+            ```javascript
+            // Example API endpoint
+            GET /api/v1/dashboard/analytics
+            ```
+          dependencies: ["portal-redesign"]
+
+        - id: "payment-integration"
+          name: "Payment Gateway Integration"
+          start: "2025-Q2"
+          end: "2025-Q3"
+          status: "in-progress"
+          description: "Integrate Stripe for payment processing"
+          dependencies: ["portal-redesign"]
+
+        - id: "support-chat"
+          name: "Live Chat Support"
+          start: "2025-Q3"
+          end: "2025-Q4"
+          status: "planned"
+          description: "Real-time chat support with AI-assisted responses"
+          dependencies: ["self-service-dashboard"]
+
+        - id: "mobile-app"
+          name: "Mobile Application"
+          start: "2025-Q4"
+          end: "2026-Q2"
+          status: "planned"
+          description: "Native mobile apps for iOS and Android"
+          dependencies: ["self-service-dashboard", "payment-integration"]
+
+  authentication-services.yaml: |
+    roadmap:
+      name: "Authentication Services"
+      service_line: "Platform"
+      owner: "Platform Team"
+      items:
+        - id: "oauth-impl"
+          name: "OAuth2 Implementation"
+          start: "2025-Q1"
+          end: "2025-Q2"
+          status: "in-progress"
+          description: "Implement OAuth2 authentication flow with support for multiple providers"
+
+        - id: "sso-integration"
+          name: "SSO Integration"
+          start: "2025-Q2"
+          end: "2025-Q3"
+          status: "planned"
+          description: "Integrate with enterprise SSO providers (Okta, Azure AD)"
+          dependencies: ["oauth-impl"]
+
+        - id: "mfa-support"
+          name: "Multi-Factor Authentication"
+          start: "2025-Q2"
+          end: "2025-Q3"
+          status: "planned"
+          description: "Add MFA support with TOTP and SMS options"
+          dependencies: ["oauth-impl"]
+
+        - id: "session-management"
+          name: "Advanced Session Management"
+          start: "2025-Q3"
+          end: "2025-Q4"
+          status: "planned"
+          description: "Implement session timeout, concurrent session limits, and activity tracking"
+          dependencies: ["oauth-impl", "sso-integration"]
+
+        - id: "rbac-system"
+          name: "Role-Based Access Control"
+          start: "2025-Q4"
+          end: "2026-Q1"
+          status: "planned"
+          description: "Build comprehensive RBAC system with granular permissions"
+          dependencies: ["session-management"]
+
+  data-platform.yaml: |
+    roadmap:
+      name: "Data Platform"
+      service_line: "Data Engineering"
+      owner: "Data Platform Team"
+      items:
+        - id: "data-lake-setup"
+          name: "Data Lake Infrastructure"
+          start: "2025-Q1"
+          end: "2025-Q2"
+          status: "completed"
+          description: "Set up S3-based data lake with proper partitioning and governance"
+
+        - id: "etl-pipeline"
+          name: "ETL Pipeline Framework"
+          start: "2025-Q2"
+          end: "2025-Q3"
+          status: "in-progress"
+          description: "Build scalable ETL pipeline using Apache Airflow"
+          dependencies: ["data-lake-setup"]
+
+        - id: "real-time-streaming"
+          name: "Real-time Streaming Platform"
+          start: "2025-Q3"
+          end: "2025-Q4"
+          status: "planned"
+          description: "Implement Kafka-based streaming for real-time analytics"
+          dependencies: ["data-lake-setup"]
+
+        - id: "data-catalog"
+          name: "Data Catalog & Discovery"
+          start: "2025-Q3"
+          end: "2025-Q4"
+          status: "blocked"
+          description: "Implement data catalog for metadata management (blocked on vendor selection)"
+          dependencies: ["etl-pipeline"]
+
+        - id: "ml-platform"
+          name: "ML Platform Integration"
+          start: "2025-Q4"
+          end: "2026-Q2"
+          status: "planned"
+          description: "Integrate ML platform for model training and deployment"
+          dependencies: ["etl-pipeline", "real-time-streaming"]
+
+        - id: "data-quality"
+          name: "Data Quality Framework"
+          start: "2026-Q1"
+          end: "2026-Q2"
+          status: "planned"
+          description: "Automated data quality checks and monitoring"
+          dependencies: ["etl-pipeline", "data-catalog"]

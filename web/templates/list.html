@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap List - IT Roadmap Visualizer</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>IT Roadmap Visualizer</h1>
+            <nav>
+                <a href="/">Upload</a>
+                <a href="/list">View Roadmaps</a>
+                <a href="/compare">Compare Roadmaps</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div>
+                <label for="serviceLineFilter">Service Line:</label>
+                <select id="serviceLineFilter">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div>
+                <label for="statusFilter">Status:</label>
+                <select id="statusFilter">
+                    <option value="">All</option>
+                    <option value="planned">Planned</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="blocked">Blocked</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="message"></div>
+
+        <div id="roadmapList" class="roadmap-list">
+            <div class="empty-state">
+                <h3>Loading roadmaps...</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allRoadmaps = [];
+
+        const roadmapList = document.getElementById('roadmapList');
+        const messageDiv = document.getElementById('message');
+        const serviceLineFilter = document.getElementById('serviceLineFilter');
+        const statusFilter = document.getElementById('statusFilter');
+
+        function showMessage(text, type) {
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+        }
+
+        function hideMessage() {
+            messageDiv.style.display = 'none';
+        }
+
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function populateFilters() {
+            const serviceLines = new Set();
+            allRoadmaps.forEach(roadmap => {
+                if (roadmap.roadmap.service_line) {
+                    serviceLines.add(roadmap.roadmap.service_line);
+                }
+            });
+
+            serviceLineFilter.innerHTML = '<option value="">All</option>';
+            Array.from(serviceLines).sort().forEach(line => {
+                const option = document.createElement('option');
+                option.value = line;
+                option.textContent = line;
+                serviceLineFilter.appendChild(option);
+            });
+        }
+
+        function filterRoadmaps() {
+            const serviceLine = serviceLineFilter.value;
+            const status = statusFilter.value;
+
+            const filtered = allRoadmaps.filter(roadmap => {
+                const matchServiceLine = !serviceLine || roadmap.roadmap.service_line === serviceLine;
+                const matchStatus = !status || roadmap.roadmap.items.some(item => item.status === status);
+                return matchServiceLine && matchStatus;
+            });
+
+            renderRoadmaps(filtered);
+        }
+
+        function renderRoadmaps(roadmaps) {
+            if (roadmaps.length === 0) {
+                roadmapList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No roadmaps found</h3>
+                        <p>Upload a roadmap to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            roadmapList.innerHTML = roadmaps.map(roadmap => {
+                const statusCounts = {};
+                roadmap.roadmap.items.forEach(item => {
+                    statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
+                });
+
+                const statusSummary = Object.entries(statusCounts)
+                    .map(([status, count]) => `<span class="status-badge ${getStatusClass(status)}">${count} ${status}</span>`)
+                    .join(' ');
+
+                return `
+                    <div class="roadmap-item">
+                        <h3>${roadmap.roadmap.name}</h3>
+                        <div class="metadata">
+                            <span><strong>Service Line:</strong> ${roadmap.roadmap.service_line}</span>
+                            ${roadmap.roadmap.owner ? `<span><strong>Owner:</strong> ${roadmap.roadmap.owner}</span>` : ''}
+                            <span><strong>Items:</strong> ${roadmap.roadmap.items.length}</span>
+                            <span><strong>Created:</strong> ${formatDate(roadmap.created_at)}</span>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            ${statusSummary}
+                        </div>
+                        <div class="actions">
+                            <button class="btn-view" onclick="viewRoadmap('${roadmap.id}')">View Timeline</button>
+                            <button class="btn-delete" onclick="deleteRoadmap('${roadmap.id}', '${roadmap.roadmap.name}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewRoadmap(id) {
+            window.location.href = `/view?id=${id}`;
+        }
+
+        async function deleteRoadmap(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/roadmaps/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Roadmap deleted successfully', 'success');
+                    loadRoadmaps();
+                } else {
+                    const error = await response.text();
+                    showMessage(`Delete failed: ${error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadRoadmaps() {
+            hideMessage();
+            try {
+                const response = await fetch('/api/roadmaps');
+                if (response.ok) {
+                    allRoadmaps = await response.json();
+                    populateFilters();
+                    filterRoadmaps();
+                } else {
+                    showMessage('Failed to load roadmaps', 'error');
+                    roadmapList.innerHTML = `
+                        <div class="empty-state">
+                            <h3>Error loading roadmaps</h3>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+                roadmapList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Error loading roadmaps</h3>
+                    </div>
+                `;
+            }
+        }
+
+        serviceLineFilter.addEventListener('change', filterRoadmaps);
+        statusFilter.addEventListener('change', filterRoadmaps);
+
+        // Load roadmaps on page load
+        loadRoadmaps();
+    </script>
+</body>
+</html>

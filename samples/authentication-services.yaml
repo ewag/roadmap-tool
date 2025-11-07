@@ -1,0 +1,44 @@
+roadmap:
+  name: "Authentication Services"
+  service_line: "Platform"
+  owner: "Platform Team"
+  items:
+    - id: "oauth-impl"
+      name: "OAuth2 Implementation"
+      start: "2025-Q1"
+      end: "2025-Q2"
+      status: "in-progress"
+      description: "Implement OAuth2 authentication flow with support for multiple providers"
+      dependencies: []
+
+    - id: "sso-integration"
+      name: "SSO Integration"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "planned"
+      description: "Integrate with enterprise SSO providers (Okta, Azure AD)"
+      dependencies: ["oauth-impl"]
+
+    - id: "mfa-support"
+      name: "Multi-Factor Authentication"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "planned"
+      description: "Add MFA support with TOTP and SMS options"
+      dependencies: ["oauth-impl"]
+
+    - id: "session-management"
+      name: "Advanced Session Management"
+      start: "2025-Q3"
+      end: "2025-Q4"
+      status: "planned"
+      description: "Implement session timeout, concurrent session limits, and activity tracking"
+      dependencies: ["oauth-impl", "sso-integration"]
+
+    - id: "rbac-system"
+      name: "Role-Based Access Control"
+      start: "2025-Q4"
+      end: "2026-Q1"
+      status: "planned"
+      description: "Build comprehensive RBAC system with granular permissions"
+      dependencies: ["session-management"]
