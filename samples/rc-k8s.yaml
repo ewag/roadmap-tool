@@ -1,0 +1,64 @@
+roadmap:
+  name: "REDCap Upgrade Project"
+  service_line: "Research IT"
+  owner: "Research Applications Team"
+  notes: |
+    ## Overview
+    This roadmap outlines the upgrade of the REDCap platform to enhance security, performance, and scalability.
+
+    ### Key Goals
+    - Upgrade REDCap to the latest supported version (15.5 as of Nov 2025)
+    - Containerize the application for cloud native deployment
+    - Upgrade PHP and supporting libraries
+    - Migrate to a new database backend (azure sql?)
+    - Ensure minimal downtime and data integrity
+    - Comprehensive testing and user acceptance
+
+
+  items:
+    - id: "requirements-analysis"
+      name: "Requirements & Impact Analysis"
+      start: "2026-Q3"
+      end: "2026-Q3"
+      status: "planned"
+      description: "Gather requirements, assess current REDCap environment, and identify upgrade impacts."
+      dependencies: []
+
+    - id: "containerization"
+      name: "Containerize REDCap"
+      start: "2026-Q3"
+      end: "2026-Q4"
+      status: "planned"
+      description: "Develop Docker containers for REDCap and supporting services."
+      dependencies: ["requirements-analysis"]
+      notes: |
+        # Goals for container effort regarding REDCap
+
+        - Get to updated PHP 8
+        - Continous integration using GitHub actions
+        - private repo for the container image
+        - deployed on kubernetes
+
+    - id: "integration-testing"
+      name: "Integration & Regression Testing"
+      start: "2026-Q4"
+      end: "2027-Q1"
+      status: "planned"
+      description: "Test all REDCap features, integrations, and custom modules in the new environment."
+      dependencies: ["containerization"]
+
+    - id: "go-live"
+      name: "Production Cutover & Go-Live"
+      start: "2027-Q1"
+      end: "2027-Q1"
+      status: "planned"
+      description: "Deploy upgraded REDCap to production grade kubernetes, monitor, and provide support."
+      dependencies: ["integration-testing"]
+
+    - id: "post-upgrade"
+      name: "Post-Upgrade Review & Documentation"
+      start: "2027-Q1"
+      end: "2027-Q2"
+      status: "planned"
+      description: "Document changes, lessons learned, and finalize project closure."
+      dependencies: ["go-live"]

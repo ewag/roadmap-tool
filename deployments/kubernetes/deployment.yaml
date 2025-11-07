@@ -18,7 +18,7 @@ spec:
       - name: ghcr-secret
       containers:
       - name: roadmap-visualizer
-        image: ghcr.io/ewag/roadmap_tool:latest
+        image: ghcr.io/ewag/roadmap-tool:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

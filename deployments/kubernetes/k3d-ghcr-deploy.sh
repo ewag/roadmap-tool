@@ -41,6 +41,7 @@ if ! k3d cluster list | grep -q "$CLUSTER_NAME"; then
     echo "Creating k3d cluster: $CLUSTER_NAME"
     k3d cluster create $CLUSTER_NAME \
         --agents 1 \
+        --volume ohcert.pem:/etc/ssl/certs/custom-ca.pem \
         --port "8080:80@loadbalancer" \
         --wait
     echo "✓ Cluster created"
@@ -71,7 +72,7 @@ IMAGE_NAME="ghcr.io/$GITHUB_USERNAME/roadmap_tool:$IMAGE_TAG"
 echo ""
 echo "Using image: $IMAGE_NAME"
 
-cd deployments/kubernetes
+# cd deployments/kubernetes
 
 # Apply Kubernetes manifests
 echo ""

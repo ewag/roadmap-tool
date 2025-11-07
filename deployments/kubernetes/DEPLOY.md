@@ -2,6 +2,14 @@
 
 This guide explains how to deploy the IT Roadmap Visualizer to Kubernetes with persistent storage.
 
+## exports needed
+
+```bash
+export GITHUB_USERNAME=<user goes here>
+export GITHUB_PAT=<PAT goes here>
+```
+
+
 ## Architecture
 
 - **Application**: Go web server serving the roadmap visualizer

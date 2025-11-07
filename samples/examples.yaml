@@ -1,0 +1,172 @@
+roadmap:
+  name: "Zero Trust Security Initiative"
+  service_line: "Enterprise IT"
+  owner: "Security Team"
+  notes: |
+    # Zero Trust Security Initiative
+
+    This roadmap implements a Zero Trust security model across the organization.
+
+    ## Key Goals
+    - Eliminate implicit trust in the network
+    - Enforce least privilege and continuous verification
+    - Improve security posture and compliance
+
+  items:
+    - id: "zt-assessment"
+      name: "Assessment & Planning"
+      start: "2026-Q3"
+      end: "2026-Q3"
+      status: "planned"
+      description: "Assess current security posture and develop Zero Trust roadmap."
+      dependencies: []
+
+    - id: "zt-identity"
+      name: "Identity & Access Management"
+      start: "2026-Q3"
+      end: "2026-Q4"
+      status: "planned"
+      description: "Implement strong authentication and least privilege access."
+      dependencies: ["zt-assessment"]
+
+    - id: "zt-network"
+      name: "Network Microsegmentation"
+      start: "2026-Q4"
+      end: "2027-Q1"
+      status: "planned"
+      description: "Redesign network for microsegmentation and monitoring."
+      dependencies: ["zt-identity"]
+
+    - id: "zt-endpoint"
+      name: "Endpoint Security"
+      start: "2027-Q1"
+      end: "2027-Q2"
+      status: "planned"
+      description: "Deploy advanced endpoint protection and compliance."
+      dependencies: ["zt-network"]
+
+    - id: "zt-review"
+      name: "Review & Continuous Improvement"
+      start: "2027-Q2"
+      end: "2027-Q2"
+      status: "planned"
+      description: "Review outcomes and establish ongoing governance."
+      dependencies: ["zt-endpoint"]
+---
+roadmap:
+  name: "Cloud Infrastructure Buildout"
+  service_line: "Enterprise IT"
+  owner: "Cloud Team"
+  notes: |
+    # Cloud Infrastructure Buildout
+
+    This roadmap guides the multi-year buildout of cloud infrastructure.
+
+    ## Key Goals
+    - Establish secure, scalable cloud foundation
+    - Migrate workloads in phases
+    - Enable automation and cost optimization
+
+  items:
+    - id: "cloud-strategy"
+      name: "Cloud Strategy & Architecture"
+      start: "2026-Q3"
+      end: "2026-Q3"
+      status: "planned"
+      description: "Define cloud adoption strategy and design architectures."
+      dependencies: []
+
+    - id: "cloud-network"
+      name: "Networking & Security Foundation"
+      start: "2026-Q3"
+      end: "2026-Q4"
+      status: "planned"
+      description: "Establish secure networking, VPNs, and IAM."
+      dependencies: ["cloud-strategy"]
+
+    - id: "cloud-migration"
+      name: "Workload Migration Phase 1"
+      start: "2027-Q1"
+      end: "2027-Q2"
+      status: "planned"
+      description: "Migrate initial applications and services."
+      dependencies: ["cloud-network"]
+
+    - id: "cloud-automation"
+      name: "Automation & DevOps"
+      start: "2027-Q2"
+      end: "2027-Q3"
+      status: "planned"
+      description: "Implement CI/CD, infrastructure as code, and monitoring."
+      dependencies: ["cloud-migration"]
+
+    - id: "cloud-optimization"
+      name: "Optimization & Expansion"
+      start: "2027-Q3"
+      end: "2028-Q2"
+      status: "planned"
+      description: "Optimize spend, expand workloads, enable hybrid/multi-cloud."
+      dependencies: ["cloud-automation"]
+---
+roadmap:
+  name: "ML/AI Workloads Enablement"
+  service_line: "Enterprise IT"
+  owner: "Data Science Team"
+  notes: |
+    # ML/AI Workloads Enablement
+
+    This roadmap enables ML/AI workloads over multiple years.
+
+    ## Key Goals
+    - Build ML/AI platform and data pipelines
+    - Pilot and productionize ML/AI models
+    - Scale adoption and drive innovation
+
+  items:
+    - id: "mlai-assessment"
+      name: "Readiness Assessment"
+      start: "2026-Q3"
+      end: "2026-Q3"
+      status: "planned"
+      description: "Evaluate current capabilities and identify opportunities."
+      dependencies: []
+
+    - id: "mlai-platform"
+      name: "Platform Selection & Setup"
+      start: "2026-Q4"
+      end: "2027-Q1"
+      status: "planned"
+      description: "Deploy ML/AI platforms, establish governance and security."
+      dependencies: ["mlai-assessment"]
+
+    - id: "mlai-data"
+      name: "Data Engineering & Pipelines"
+      start: "2027-Q1"
+      end: "2027-Q3"
+      status: "planned"
+      description: "Build data pipelines and enable feature engineering."
+      dependencies: ["mlai-platform"]
+
+    - id: "mlai-pilot"
+      name: "Pilot ML/AI Workloads"
+      start: "2027-Q3"
+      end: "2027-Q4"
+      status: "planned"
+      description: "Develop and deploy pilot ML/AI models."
+      dependencies: ["mlai-data"]
+
+    - id: "mlai-prod"
+      name: "Productionize ML/AI"
+      start: "2028-Q1"
+      end: "2028-Q2"
+      status: "planned"
+      description: "Operationalize pilots and integrate with business processes."
+      dependencies: ["mlai-pilot"]
+
+    - id: "mlai-expansion"
+      name: "Expansion & Continuous Improvement"
+      start: "2028-Q2"
+      end: "2029-Q4"
+      status: "planned"
+      description: "Scale ML/AI adoption and enable new use cases."
+      dependencies: ["mlai-prod"]
