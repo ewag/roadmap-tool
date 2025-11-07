@@ -166,3 +166,29 @@ func (fs *FileStorage) Delete(id string) error {
 
 	return nil
 }
+
+// ValidateExternalDependencies validates all external dependencies across roadmaps
+func ValidateExternalDependencies(roadmaps []*models.StoredRoadmap) []models.ExternalDependencyValidation {
+	// Convert to slice of values for models function
+	rmValues := make([]models.StoredRoadmap, len(roadmaps))
+	for i, rm := range roadmaps {
+		rmValues[i] = *rm
+	}
+	return models.ValidateExternalDependencies(rmValues)
+}
+
+// GetExternalDependents returns all items that depend on items in the given roadmap
+func GetExternalDependents(roadmapID string, allRoadmaps []*models.StoredRoadmap) []struct {
+	RoadmapID   string
+	RoadmapName string
+	ItemID      string
+	ItemName    string
+	DependsOn   string
+} {
+	// Convert to slice of values for models function
+	rmValues := make([]models.StoredRoadmap, len(allRoadmaps))
+	for i, rm := range allRoadmaps {
+		rmValues[i] = *rm
+	}
+	return models.GetExternalDependents(roadmapID, rmValues)
+}

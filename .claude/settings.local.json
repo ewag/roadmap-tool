@@ -9,7 +9,10 @@
       "Bash(curl:*)",
       "Bash(python3:*)",
       "Bash(kill:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(go build:*)",
+      "Bash(./roadmap-server)",
+      "Bash(xargs kill:*)"
     ],
     "deny": [],
     "ask": []

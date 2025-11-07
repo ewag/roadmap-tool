@@ -1,0 +1,186 @@
+roadmap:
+  name: "Frontend Application Platform"
+  service_line: "Frontend Engineering"
+  owner: "Frontend Team"
+  notes: |
+    # Frontend Application Platform
+
+    This roadmap depends on backend authentication and cloud infrastructure.
+
+    ## Key Dependencies
+    - Authentication Services for user login
+    - Cloud Infrastructure for hosting
+
+  items:
+    - id: "fe-design-system"
+      name: "Design System Foundation"
+      start: "2025-Q1"
+      end: "2025-Q2"
+      status: "completed"
+      description: "Build reusable component library and design tokens"
+
+    - id: "fe-auth-integration"
+      name: "Authentication Integration"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "in-progress"
+      description: "Integrate OAuth2 and SSO for user authentication"
+      dependencies:
+        - "fe-design-system"
+      external_dependencies:
+        - roadmap: "Authentication Services"
+          item: "oauth-impl"
+          reason: "Requires OAuth2 backend to be available"
+          criticality: "critical"
+        - roadmap: "Authentication Services"
+          item: "sso-integration"
+          reason: "Need SSO integration for enterprise customers"
+          criticality: "high"
+
+    - id: "fe-deployment"
+      name: "Cloud Deployment Pipeline"
+      start: "2025-Q3"
+      end: "2025-Q4"
+      status: "planned"
+      description: "Set up CI/CD and hosting infrastructure"
+      dependencies:
+        - "fe-design-system"
+      external_dependencies:
+        - roadmap: "Cloud Infrastructure Buildout"
+          item: "cloud-automation"
+          reason: "Need CI/CD infrastructure for automated deployments"
+          criticality: "high"
+        - roadmap: "Cloud Infrastructure Buildout"
+          item: "cloud-network"
+          reason: "Requires secure networking and CDN setup"
+          criticality: "critical"
+
+    - id: "fe-dashboard"
+      name: "User Dashboard"
+      start: "2025-Q4"
+      end: "2026-Q1"
+      status: "planned"
+      description: "Build main user dashboard with analytics"
+      dependencies:
+        - "fe-auth-integration"
+        - "fe-deployment"
+---
+roadmap:
+  name: "Mobile Applications"
+  service_line: "Mobile Engineering"
+  owner: "Mobile Team"
+  notes: |
+    # Mobile Applications
+
+    Native iOS and Android apps that share backend with web platform.
+
+  items:
+    - id: "mobile-prototypes"
+      name: "Mobile Prototypes"
+      start: "2025-Q2"
+      end: "2025-Q3"
+      status: "in-progress"
+      description: "Create initial prototypes for iOS and Android"
+
+    - id: "mobile-auth"
+      name: "Mobile Authentication"
+      start: "2025-Q3"
+      end: "2025-Q4"
+      status: "planned"
+      description: "Implement mobile OAuth2 flow"
+      dependencies:
+        - "mobile-prototypes"
+      external_dependencies:
+        - roadmap: "Authentication Services"
+          item: "oauth-impl"
+          reason: "Requires OAuth2 backend with PKCE support for mobile"
+          criticality: "critical"
+        - roadmap: "Authentication Services"
+          item: "mfa-support"
+          reason: "MFA required for mobile security compliance"
+          criticality: "high"
+
+    - id: "mobile-api-integration"
+      name: "Backend API Integration"
+      start: "2025-Q4"
+      end: "2026-Q1"
+      status: "planned"
+      description: "Integrate with backend APIs and set up sync"
+      dependencies:
+        - "mobile-auth"
+      external_dependencies:
+        - roadmap: "Frontend Application Platform"
+          item: "fe-auth-integration"
+          reason: "Share authentication tokens and user session management"
+          criticality: "medium"
+
+    - id: "mobile-release"
+      name: "App Store Release"
+      start: "2026-Q1"
+      end: "2026-Q2"
+      status: "planned"
+      description: "Release v1.0 to App Store and Play Store"
+      dependencies:
+        - "mobile-api-integration"
+---
+roadmap:
+  name: "Data Analytics Platform"
+  service_line: "Data Engineering"
+  owner: "Data Team"
+  notes: |
+    # Data Analytics Platform
+
+    Real-time analytics and reporting infrastructure.
+
+  items:
+    - id: "analytics-foundation"
+      name: "Analytics Infrastructure"
+      start: "2025-Q3"
+      end: "2026-Q1"
+      status: "planned"
+      description: "Set up data warehouse and ETL pipelines"
+      external_dependencies:
+        - roadmap: "Cloud Infrastructure Buildout"
+          item: "cloud-strategy"
+          reason: "Need cloud platform decisions before building data infrastructure"
+          criticality: "critical"
+        - roadmap: "Cloud Infrastructure Buildout"
+          item: "cloud-network"
+          reason: "Requires secure VPC and data transfer mechanisms"
+          criticality: "high"
+
+    - id: "analytics-ml-integration"
+      name: "ML Platform Integration"
+      start: "2026-Q1"
+      end: "2026-Q3"
+      status: "planned"
+      description: "Integrate ML/AI capabilities for predictive analytics"
+      dependencies:
+        - "analytics-foundation"
+      external_dependencies:
+        - roadmap: "ML/AI Workloads Enablement"
+          item: "mlai-platform"
+          reason: "Need ML platform for model deployment"
+          criticality: "high"
+        - roadmap: "ML/AI Workloads Enablement"
+          item: "mlai-data"
+          reason: "Share data pipelines for feature engineering"
+          criticality: "medium"
+
+    - id: "analytics-dashboards"
+      name: "Analytics Dashboards"
+      start: "2026-Q2"
+      end: "2026-Q4"
+      status: "planned"
+      description: "Build customer-facing analytics dashboards"
+      dependencies:
+        - "analytics-ml-integration"
+      external_dependencies:
+        - roadmap: "Frontend Application Platform"
+          item: "fe-dashboard"
+          reason: "Embed analytics into main user dashboard"
+          criticality: "medium"
+        - roadmap: "Authentication Services"
+          item: "rbac-system"
+          reason: "Need role-based access for analytics data"
+          criticality: "high"

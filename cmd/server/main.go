@@ -33,6 +33,7 @@ func main() {
 	// Set up routes
 	http.HandleFunc("/api/roadmaps", roadmapHandler.HandleRoadmaps)
 	http.HandleFunc("/api/roadmaps/", roadmapHandler.HandleRoadmaps)
+	http.HandleFunc("/api/dependencies/", roadmapHandler.HandleDependencies)
 
 	// Health check endpoints
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
