@@ -14,10 +14,12 @@ spec:
       labels:
         app: roadmap-visualizer
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
       - name: roadmap-visualizer
-        image: roadmap-visualizer:latest
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/ewag/roadmap_tool:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
